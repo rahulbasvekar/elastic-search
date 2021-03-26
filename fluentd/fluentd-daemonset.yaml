@@ -2,13 +2,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: fluentd
-  namespace: infra
+  namespace: logging
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: fluentd
-  namespace: infra
+  namespace: logging
 rules:
 - apiGroups:
   - ""
@@ -31,25 +31,21 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: fluentd
-  namespace: infra
+  namespace: logging
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: fluentd
-  namespace: infra
+  namespace: logging
   labels:
     k8s-app: fluentd-logging
     version: v1
     kubernetes.io/cluster-service: "true"
 spec:
-  selector:
-    matchLabels:
-      app: fluentd-logging
   template:
     metadata:
       labels:
-        app: fluentd-logging
         k8s-app: fluentd-logging
         version: v1
         kubernetes.io/cluster-service: "true"
@@ -64,7 +60,7 @@ spec:
         image: fluent/fluentd-kubernetes-daemonset:v1.1-debian-elasticsearch
         env:
         - name:  FLUENT_ELASTICSEARCH_HOST
-          value: "elasticsearch-client.infra.svc.cluster.local"
+          value: "elasticsearch-client.logging.svc.cluster.local"
         - name:  FLUENT_ELASTICSEARCH_PORT
           value: "9200"
         - name: FLUENT_ELASTICSEARCH_SCHEME
